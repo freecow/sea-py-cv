@@ -71,9 +71,9 @@ def create_standalone_build():
     
     try:
         subprocess.run(cmd, check=True)
-        print("\n✅ Build successful!")
+        print("\n[OK] Build successful!")
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ Build failed: {e}")
+        print(f"\n[ERROR] Build failed: {e}")
         return False
     
     # 5. Create deployment package
@@ -92,20 +92,20 @@ def create_standalone_build():
     
     if os.path.exists(src_exe):
         shutil.copy2(src_exe, dst_exe)
-        print(f"✅ Copied executable: {exe_name}")
+        print(f"[OK] Copied executable: {exe_name}")
     else:
-        print(f"❌ Executable not found: {src_exe}")
+        print(f"[ERROR] Executable not found: {src_exe}")
         return False
     
     # Copy config folder
     if os.path.exists("config"):
         shutil.copytree("config", os.path.join(deploy_dir, "config"))
-        print("✅ Copied config folder")
+        print("[OK] Copied config folder")
     
     # Copy .env example file
     if os.path.exists(".env.example"):
         shutil.copy2(".env.example", deploy_dir)
-        print("✅ Copied .env example file")
+        print("[OK] Copied .env example file")
     
     # Copy documentation
     if os.path.exists("README.md"):
@@ -174,14 +174,14 @@ def create_standalone_build():
 - 查看README.md获取完整文档
 """
     
-    with open(os.path.join(deploy_dir, "使用说明.txt"), "w", encoding="utf-8") as f:
+    with open(os.path.join(deploy_dir, "USAGE.txt"), "w", encoding="utf-8") as f:
         f.write(readme_content)
     
     print("\n====================================")
-    print("🎉 Deployment package created successfully!")
-    print(f"📁 Package location: {deploy_dir}/")
-    print(f"🚀 Executable: {deploy_dir}/{exe_name}")
-    print("📋 Share the entire folder with your team")
+    print("[SUCCESS] Deployment package created successfully!")
+    print(f"Package location: {deploy_dir}/")
+    print(f"Executable: {deploy_dir}/{exe_name}")
+    print("Share the entire folder with your team")
     print("====================================")
     
     return True
