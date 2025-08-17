@@ -1,0 +1,79 @@
+name: Build Executables
+
+# Auto-build for multiple platforms - SeaTable sync tool
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  release:
+    types: [created, published]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            output-name: seatable-sync-linux
+            output-path: dist/seatable-sync-linux
+          - os: windows-latest
+            output-name: seatable-sync-windows.exe
+            output-path: dist/seatable-sync-windows.exe
+          - os: macos-latest
+            output-name: seatable-sync-macos
+            output-path: dist/seatable-sync-macos
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+        
+    - name: Build executable with PyInstaller
+      run: |
+        python build_standalone.py
+        
+    - name: Rename executable for release
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          if [ -f "dist/seatable-sync.exe" ]; then
+            mv dist/seatable-sync.exe dist/${{ matrix.output-name }}
+          fi
+        else
+          if [ -f "dist/seatable-sync" ]; then
+            mv dist/seatable-sync dist/${{ matrix.output-name }}
+            chmod +x dist/${{ matrix.output-name }}
+          fi
+        fi
+      shell: bash
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.output-name }}
+        path: ${{ matrix.output-path }}
+        retention-days: 90
+        
+    - name: Upload to release (if release)
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ matrix.output-path }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

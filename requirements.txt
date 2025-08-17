@@ -1,0 +1,18 @@
+# SeaTable SDK
+seatable-api>=2.3.0
+
+# 异步支持
+aiohttp>=3.8.0
+asyncio>=3.4.3
+
+# 日期处理
+python-dateutil>=2.8.2
+
+# 日志处理
+colorlog>=6.7.0
+
+# 类型提示
+typing-extensions>=4.5.0
+
+# 环境变量支持
+python-dotenv>=1.0.0
