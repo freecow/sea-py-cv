@@ -22,6 +22,8 @@
    SEATABLE_TOKEN=your_api_token_here
    SEATABLE_CONFIG_FILE=config/project_stats_config.json
    ```
+   
+   > ⚠️ **安全提醒**: .env文件包含敏感信息（API Token），已通过.gitignore排除，不会被提交到版本控制系统。
 
 3. **运行同步工具**
    ```bash
@@ -45,6 +47,8 @@
    cp .env.example .env
    # 编辑.env文件填入配置
    ```
+   
+   > ⚠️ **安全提醒**: .env文件包含API Token等敏感信息，已通过.gitignore排除，请勿提交到版本控制。
 
 3. **运行同步**
    ```bash
@@ -526,7 +530,8 @@ sea-py-cv/
 ├── 🔌 seatable_official_adapter.py   # SeaTable API适配器
 ├── 🔨 build_standalone.py            # 构建脚本
 ├── 📋 requirements.txt               # Python依赖
-├── 🔧 .env.example                   # 环境变量模板
+├── 🔧 .env.example                   # 环境变量模板 (.env文件不会被提交)
+├── 🛡️ .gitignore                     # Git忽略文件配置
 ├── 📄 README.md                      # 本文档
 ├── 📄 PREPROCESS_GUIDE.md            # 数据预处理指南
 └── 📜 LICENSE                        # 开源许可证
