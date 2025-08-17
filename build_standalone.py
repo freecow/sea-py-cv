@@ -12,16 +12,16 @@ import json
 
 def create_standalone_build():
     print("====================================")
-    print("   创建SeaTable同步工具部署包")
+    print("   Building SeaTable Sync Tool")
     print("====================================")
     
-    # 1. 安装依赖
-    print("1. 安装依赖包...")
+    # 1. Install dependencies
+    print("1. Installing dependencies...")
     subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], check=True)
     subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"], check=True)
     
-    # 2. 清理旧文件
-    print("\n2. 清理之前的构建文件...")
+    # 2. Clean old files
+    print("\n2. Cleaning previous build files...")
     for folder in ["dist", "build"]:
         if os.path.exists(folder):
             shutil.rmtree(folder)
@@ -30,11 +30,11 @@ def create_standalone_build():
         if file.endswith(".spec"):
             os.remove(file)
     
-    # 3. 收集配置文件
+    # 3. Collect config files
     config_files = []
     if os.path.exists("config"):
         config_files = [f"config/{f}" for f in os.listdir("config") if f.endswith(".json")]
-    print(f"\n3. 找到配置文件: {', '.join(config_files)}")
+    print(f"\n3. Found config files: {', '.join(config_files)}")
     
     # 4. 构建PyInstaller命令
     cmd = [
@@ -66,48 +66,48 @@ def create_standalone_build():
     # 添加主文件
     cmd.append("run_sync.py")
     
-    print(f"\n4. 执行打包命令...")
-    print(f"命令: {' '.join(cmd)}")
+    print(f"\n4. Executing build command...")
+    print(f"Command: {' '.join(cmd)}")
     
     try:
         subprocess.run(cmd, check=True)
-        print("\n✅ 打包成功！")
+        print("\n✅ Build successful!")
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ 打包失败: {e}")
+        print(f"\n❌ Build failed: {e}")
         return False
     
-    # 5. 创建部署包
-    print("\n5. 创建部署包...")
+    # 5. Create deployment package
+    print("\n5. Creating deployment package...")
     
-    # 创建部署目录
+    # Create deployment directory
     deploy_dir = "seatable-sync-deploy"
     if os.path.exists(deploy_dir):
         shutil.rmtree(deploy_dir)
     os.makedirs(deploy_dir)
     
-    # 复制可执行文件
+    # Copy executable file
     exe_name = "seatable-sync.exe" if sys.platform.startswith("win") else "seatable-sync"
     src_exe = os.path.join("dist", exe_name)
     dst_exe = os.path.join(deploy_dir, exe_name)
     
     if os.path.exists(src_exe):
         shutil.copy2(src_exe, dst_exe)
-        print(f"✅ 复制可执行文件: {exe_name}")
+        print(f"✅ Copied executable: {exe_name}")
     else:
-        print(f"❌ 找不到可执行文件: {src_exe}")
+        print(f"❌ Executable not found: {src_exe}")
         return False
     
-    # 复制配置文件夹
+    # Copy config folder
     if os.path.exists("config"):
         shutil.copytree("config", os.path.join(deploy_dir, "config"))
-        print("✅ 复制配置文件夹")
+        print("✅ Copied config folder")
     
-    # 复制.env示例文件
+    # Copy .env example file
     if os.path.exists(".env.example"):
         shutil.copy2(".env.example", deploy_dir)
-        print("✅ 复制.env示例文件")
+        print("✅ Copied .env example file")
     
-    # 复制文档
+    # Copy documentation
     if os.path.exists("README.md"):
         shutil.copy2("README.md", deploy_dir)
     if os.path.exists("PREPROCESS_GUIDE.md"):
@@ -178,10 +178,10 @@ def create_standalone_build():
         f.write(readme_content)
     
     print("\n====================================")
-    print("🎉 部署包创建完成！")
-    print(f"📁 部署包位置: {deploy_dir}/")
-    print(f"🚀 可执行文件: {deploy_dir}/{exe_name}")
-    print("📋 请将整个文件夹发送给同事")
+    print("🎉 Deployment package created successfully!")
+    print(f"📁 Package location: {deploy_dir}/")
+    print(f"🚀 Executable: {deploy_dir}/{exe_name}")
+    print("📋 Share the entire folder with your team")
     print("====================================")
     
     return True
