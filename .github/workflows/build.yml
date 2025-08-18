@@ -82,15 +82,27 @@ jobs:
     - name: Rename executable for release
       run: |
         if [ "${{ runner.os }}" = "Windows" ]; then
+          # Windows构建已经生成正确的文件名，无需重命名
           if [ -f "dist/seatable-sync-windows.exe" ]; then
-            mv dist/seatable-sync-windows.exe dist/${{ matrix.output-name }}
+            echo "[OK] Windows executable found: dist/seatable-sync-windows.exe"
+            ls -la dist/seatable-sync-windows.exe
           elif [ -f "dist/seatable-sync.exe" ]; then
             mv dist/seatable-sync.exe dist/${{ matrix.output-name }}
+            echo "[OK] Renamed seatable-sync.exe to ${{ matrix.output-name }}"
+          else
+            echo "[ERROR] No Windows executable found"
+            ls -la dist/
+            exit 1
           fi
         else
           if [ -f "dist/seatable-sync" ]; then
             mv dist/seatable-sync dist/${{ matrix.output-name }}
             chmod +x dist/${{ matrix.output-name }}
+            echo "[OK] Renamed and made executable: ${{ matrix.output-name }}"
+          else
+            echo "[ERROR] No executable found"
+            ls -la dist/
+            exit 1
           fi
         fi
       shell: bash
