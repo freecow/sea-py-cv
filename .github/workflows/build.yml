@@ -39,20 +39,52 @@ jobs:
       with:
         python-version: '3.9'
         
+    # Windows特定：安装Visual C++ Redistributable
+    - name: Install Visual C++ Redistributable (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile "vc_redist.x64.exe"
+        Start-Process -Wait -FilePath "vc_redist.x64.exe" -ArgumentList "/quiet"
+      shell: powershell
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pyinstaller
+        pip install pyinstaller==6.15.0
         
-    - name: Build executable with PyInstaller
+    # Windows特定构建
+    - name: Build executable with PyInstaller (Windows)
+      if: runner.os == 'Windows'
+      run: python build_windows_ci.py
+      
+    # Windows构建验证
+    - name: Verify Windows build (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        dir dist
+        if (Test-Path "dist/seatable-sync-windows.exe") {
+          Write-Output "[OK] Windows executable found"
+          $size = (Get-Item "dist/seatable-sync-windows.exe").Length
+          Write-Output "File size: $size bytes"
+        } else {
+          Write-Output "[ERROR] Windows executable not found"
+          exit 1
+        }
+      shell: powershell
+        
+    # 其他平台构建
+    - name: Build executable with PyInstaller (Non-Windows)
+      if: runner.os != 'Windows'
       run: |
         python build_standalone.py
         
     - name: Rename executable for release
       run: |
         if [ "${{ runner.os }}" = "Windows" ]; then
-          if [ -f "dist/seatable-sync.exe" ]; then
+          if [ -f "dist/seatable-sync-windows.exe" ]; then
+            mv dist/seatable-sync-windows.exe dist/${{ matrix.output-name }}
+          elif [ -f "dist/seatable-sync.exe" ]; then
             mv dist/seatable-sync.exe dist/${{ matrix.output-name }}
           fi
         else

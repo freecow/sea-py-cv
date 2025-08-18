@@ -42,6 +42,8 @@ def create_standalone_build():
         "--onefile",
         "--console",
         "--name", "seatable-sync",
+        "--noupx",  # 禁用UPX压缩，避免DLL加载问题
+        "--clean",  # 清理缓存
         "--hidden-import", "seatable_api",
         "--hidden-import", "aiohttp",
         "--hidden-import", "asyncio",
@@ -52,6 +54,14 @@ def create_standalone_build():
         "--hidden-import", "json",
         "--hidden-import", "datetime"
     ]
+    
+    # Windows特定选项
+    if sys.platform.startswith("win"):
+        cmd.extend([
+            "--collect-all", "seatable_api",  # 收集所有seatable_api依赖
+            "--collect-all", "aiohttp",       # 收集所有aiohttp依赖
+            "--noconsole" if "--noconsole" in sys.argv else "--console"
+        ])
     
     # 添加配置文件夹
     if os.path.exists("config"):
