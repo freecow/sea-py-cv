@@ -4,6 +4,11 @@
 .env.production
 .env.development
 
+# 业务配置文件 - 包含敏感业务信息，不应提交到版本控制
+memo*.json
+**/memo*.json
+**/project_stats_config.json
+
 # Python 相关
 __pycache__/
 *.py[cod]

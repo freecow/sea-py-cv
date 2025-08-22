@@ -1,0 +1,41 @@
+{
+  "sync_rules": [
+    {
+      "source_table": "source_table_name",
+      "target_table": "target_table_name",
+      "source_keys": ["key_field_1"],
+      "target_keys": ["target_key_1"],
+      "source_fields": ["field_1"],
+      "target_fields": ["target_field_1"],
+      "conditions": [
+        { "field": "date_field", "op": ">=", "value": "YYYY-MM-DD" },
+        { "field": "status_field", "op": "=", "value": "status_value" }
+      ],
+      "aggregation": "sum",
+      "factor": 1.0,
+      "clear_before_sync": true,
+      "allow_insert": false,
+      "should_run": true,
+      "note": "Description of this sync rule"
+    }
+  ],
+  "data_dictionary": {
+    "config_key_1": "config_value_1",
+    "date_placeholder": "YYYY-MM-DD",
+    "percentage_placeholder": "XX%"
+  },
+  "latest_aggregation_config": {
+    "enabled": true,
+    "default_time_field": "time_field_name",
+    "default_sort_order": "desc",
+    "fallback_time_fields": ["backup_time_field_1", "backup_time_field_2"],
+    "field_fill_config": {
+      "enabled": true,
+      "fill_fields": [
+        "field_name_1",
+        "field_name_2"
+      ],
+      "key_field": "primary_key_field"
+    }
+  }
+}

@@ -20,7 +20,7 @@
    
    # 编辑.env文件，填入你的配置
    SEATABLE_TOKEN=your_api_token_here
-   SEATABLE_CONFIG_FILE=config/project_stats_config.json
+   SEATABLE_CONFIG_FILE=config/sample.json.example
    ```
    
    > ⚠️ **安全提醒**: .env文件包含敏感信息（API Token），已通过.gitignore排除，不会被提交到版本控制系统。
@@ -56,7 +56,7 @@
    python run_sync.py
    
    # 或使用命令行参数
-   python run_sync.py --token YOUR_TOKEN --config config/project_stats_config.json
+   python run_sync.py --token YOUR_TOKEN --config config/sample.json.example
    ```
 
 ## 📦 自动构建
@@ -80,7 +80,7 @@ python build_standalone.py
 # .env文件
 SEATABLE_TOKEN=your_api_token_here
 SEATABLE_SERVER_URL=https://cloud.seatable.cn
-SEATABLE_CONFIG_FILE=config/project_stats_config.json
+SEATABLE_CONFIG_FILE=config/sample.json.example
 SEATABLE_MAX_CONCURRENT=5
 ```
 
@@ -100,6 +100,7 @@ SEATABLE_MAX_CONCURRENT=5
 - **🎯 多种聚合模式** - 支持求和(sum)、广播(broadcast)、最新记录(latest)、复制(copy)等
 - **🔀 多字段映射** - 支持单规则多字段映射，大幅简化配置文件
 - **🎛️ 智能数据处理** - 支持条件过滤、排除条件、数据变换、日期和数值比较
+- **🔧 数据预处理** - 支持7种预处理类型：取分隔符前内容、条件拼接、日期提取、数学计算、字符串替换等
 - **📚 数据字典支持** - 支持变量解析，如 `{报表截止时间}`、`{阶段目标比例}` 等
 - **⚡ 批量操作优化** - 智能批次大小调整、重试机制、并发控制
 - **📋 完善的日志系统** - 详细的执行日志，便于调试和监控
@@ -506,34 +507,29 @@ SEATABLE_MAX_CONCURRENT=5
 
 ### 2. 配置文件模板
 
-#### 项目统计配置模板
-参考：`config/project_stats_config.json`
-- 适用于项目收入、验收、签单统计
-- 包含A1-A5、F1-F5系列报表
-
-#### 工时统计配置模板  
-参考：`config/worktime_stats_config.json`
-- 适用于工时数据统计分析
-- 支持部门、项目、月份多维度统计
-- 大量使用多字段映射优化
+#### 配置文件模板
+参考：`config/sample.json.example`
+- 包含常用的配置结构示例
+- 支持多种聚合模式和字段映射
+- 可根据实际业务需求调整字段名和条件
 
 ## 📁 项目结构
 
 ```
 sea-py-cv/
 ├── 📁 config/                        # 配置文件目录
-│   └── project_stats_config.json    # 项目统计配置示例
+│   └── sample.json.example          # 配置文件示例模板
 ├── 📁 .github/workflows/             # GitHub Actions 自动构建
 │   └── build.yml                    # 多平台构建配置
 ├── 🐍 run_sync.py                    # 主程序入口
 ├── ⚡ fast_sync.py                   # 核心同步引擎
 ├── 🔌 seatable_official_adapter.py   # SeaTable API适配器
 ├── 🔨 build_standalone.py            # 构建脚本
+├── 🔨 build_windows_ci.py            # Windows CI构建脚本
 ├── 📋 requirements.txt               # Python依赖
 ├── 🔧 .env.example                   # 环境变量模板 (.env文件不会被提交)
 ├── 🛡️ .gitignore                     # Git忽略文件配置
 ├── 📄 README.md                      # 本文档
-├── 📄 PREPROCESS_GUIDE.md            # 数据预处理指南
 └── 📜 LICENSE                        # 开源许可证
 ```
 
@@ -557,7 +553,7 @@ seatable-sync-windows.exe
 python run_sync.py
 
 # 指定不同配置文件
-python run_sync.py --config config/project_stats_config.json
+python run_sync.py --config config/sample.json.example
 
 # 完全自定义参数
 python run_sync.py \
@@ -569,7 +565,7 @@ python run_sync.py \
 
 ### 配置文件验证
 ```bash
-python -c "import json; print('配置正确' if json.load(open('config/project_stats_config.json')) else '配置错误')"
+python -c "import json; print('配置正确' if json.load(open('config/sample.json.example')) else '配置错误')"
 ```
 
 ## 性能优化
@@ -651,7 +647,7 @@ python run_sync.py --help                  # 查看帮助信息
 ```bash
 python -c "
 import json
-with open('config/project_stats_config.json') as f:
+with open('config/sample.json.example') as f:
     config = json.load(f)
     rules = config.get('sync_rules', [])
     multi_rules = [r for r in rules if 'multi_field_mappings' in r]
@@ -692,7 +688,7 @@ with open('config/project_stats_config.json') as f:
 4. **性能问题**: 调整并发数和批次大小
 
 ### 获取帮助
-- 📖 **查看文档**: 详细配置说明见本README和PREPROCESS_GUIDE.md
+- 📖 **查看文档**: 详细配置说明见本README
 - 🐛 **报告问题**: 提交Issue到GitHub仓库
 - 💻 **源码研究**: 查看源码中的详细注释和示例
 
@@ -700,6 +696,97 @@ with open('config/project_stats_config.json') as f:
 - ☁️ **SeaTable云服务版** (cloud.seatable.cn)
 - 🏢 **SeaTable私有部署版** (自定义域名)
 - 📱 **SeaTable API v2.x** 及以上版本
+
+## 🔧 数据预处理功能
+
+### 概述
+本工具完全替代了原有的 `datapre.js`，使用 Python 实现了更高效、更稳定的数据预处理操作。
+
+### 主要优势
+- **高性能**: Python 比 JavaScript 处理大量数据更快
+- **更稳定**: 统一的错误处理和重试机制
+- **易维护**: 与现有同步系统集成，统一的代码库
+- **功能完备**: 支持所有原 datapre.js 的处理类型
+
+### 支持的预处理类型
+
+| 处理类型 | 聚合模式 | 说明 | 示例 |
+|----------|----------|------|------|
+| 取分隔符前内容 | `firstPart` | 取分隔符前内容 | "部门A,部门B" → "部门A" |
+| 条件拼接 | `conditional_concat` | 条件满足时拼接字段 | 符合条件时拼接"年份+签单" |
+| 年份提取 | `yearIf` | 条件提取年份 | "2025-03-15" → 2025 |
+| 月份提取 | `monthIf` | 提取月份 | "2025-03-15" → "3月" |
+| 年月提取 | `dateYearMonth` | 提取年月 | "2025-03-15" → "202503" |
+| 数学计算 | `math_expression` | 数学表达式计算 | "合同金额-已验收额" |
+| 字符串替换 | `string_replace` | 字符串替换 | "旧部门名" → "新部门名" |
+
+### 预处理配置示例
+
+#### 1. 取分隔符前内容
+```json
+{
+  "source_field": "实际交付部门",
+  "target_field": "主交付部门", 
+  "aggregation": "firstPart",
+  "conditions": []
+}
+```
+
+#### 2. 条件拼接
+```json
+{
+  "source_field": "",
+  "target_field": "签单标识",
+  "aggregation": "conditional_concat",
+  "conditions": [
+    {"field": "渠道", "op": "!=", "value": "内部"},
+    {"field": "有无预算", "op": "=", "value": "已签合同"}
+  ],
+  "concat_fields": ["年份", "签单"]
+}
+```
+
+#### 3. 数学计算
+```json
+{
+  "source_field": "",
+  "target_field": "当前在建总额",
+  "aggregation": "math_expression",
+  "conditions": [
+    {"field": "项目类型", "op": "!=", "value": "运维服务"}
+  ],
+  "math_expression": "合同金额-阶段已验收额"
+}
+```
+
+#### 4. 字符串替换
+```json
+{
+  "source_field": "部门名称",
+  "target_field": "主交付部门",
+  "aggregation": "string_replace",
+  "replace_mappings": {
+    "信访交付组": "信访事业部",
+    "政通云交付部": "政务产品实施部"
+  }
+}
+```
+
+### 执行流程
+
+预处理按执行类别分阶段运行：
+1. **第一步**: 基础数据处理（提取、转换基础字段）
+2. **第二步**: 关联数据处理（基于第一步结果的进一步处理）  
+3. **第三步**: 最终数据处理（最后的清理和标准化）
+
+配置文件中使用 `execution_category` 字段指定执行阶段：
+```json
+{
+  "execution_category": "第一步",
+  "should_run": true,
+  "note": "基础字段预处理"
+}
+```
 
 ## 📄 开源许可
 
